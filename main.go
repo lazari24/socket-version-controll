@@ -20,15 +20,15 @@ func main() {
 
 		if auth != key {
 			http.Error(w, "Not Authorized", http.StatusForbidden)
+		} else {
+			b, _ := ioutil.ReadAll(r.Body)
+
+			go func() {
+				store.broadcast <- b
+			}()
+
+			fmt.Fprintf(w, "Ok")
 		}
-
-		b, _ := ioutil.ReadAll(r.Body)
-
-		go func() {
-			store.broadcast <- b
-		}()
-
-		fmt.Fprintf(w, "Ok")
 	})
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(store, w, r, origin)
