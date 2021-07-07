@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Test</title>
+</head>
+<body>
+<pre id="fileData">Not Updated</pre>
+<script type="text/javascript">
+    (function() {
+        var data = document.getElementById("fileData");
+        var conn = new WebSocket("ws://localhost:8080/ws");
+        conn.onclose = function(evt) {
+            data.textContent = 'Connection closed';
+        }
+        conn.onmessage = function(evt) {
+            data.textContent = evt.data;
+        }
+    })();
+</script>
+</body>
+</html>
