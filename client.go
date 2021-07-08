@@ -92,13 +92,9 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(store *Store, w http.ResponseWriter, r *http.Request, origin string) {
+func serveWs(store *Store, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
-		if r.Host == origin {
-			return true
-		} else {
-			return false
-		}
+		return true
 	}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -107,6 +103,7 @@ func serveWs(store *Store, w http.ResponseWriter, r *http.Request, origin string
 	}
 	client := &Client{store: store, conn: conn, send: make(chan []byte, 256)}
 	client.store.register <- client
+	client.send <- LastVersion
 
 	go client.writePump()
 	go client.readPump()
