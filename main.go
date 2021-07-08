@@ -8,9 +8,13 @@ import (
 	"os"
 )
 
+var LastVersion []byte
+
 func main() {
+	savedVersion := os.Getenv("LAST_VERSION")
+	LastVersion = []byte(savedVersion)
+
 	key := os.Getenv("WS_SECRET_KEY")
-	origin := os.Getenv("WS_ORIGIN")
 
 	store := newStore()
 	go store.run()
@@ -23,6 +27,8 @@ func main() {
 		} else {
 			b, _ := ioutil.ReadAll(r.Body)
 
+			LastVersion = b
+
 			go func() {
 				store.broadcast <- b
 			}()
@@ -31,7 +37,7 @@ func main() {
 		}
 	})
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(store, w, r, origin)
+		serveWs(store, w, r)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
